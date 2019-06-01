@@ -2,7 +2,16 @@
  
 import random
 from Life import Life
- 
+from generate import newchrome
+from distance import totaldis
+
+origincoor = [[0,0,0],[0,0,10],[0,0,20],[0,0,30],[0,0,40],[0,0,50]]
+targetcoor = [[3000,2000,4000,5000],[1000,5000,2000,4000]]
+ThreatRadius = 300
+TurnRadius = 100
+ReconTime = 5
+Velocity = 50
+
 class GA(object):
       """遗传算法类"""
       def __init__(self, aCrossRate, aMutationRate, aLifeCount, aGeneLength, aMatchFun = lambda life : 1):
@@ -25,17 +34,16 @@ class GA(object):
             """初始化种群"""
             self.lives = []
             for i in range(self.lifeCount):
-                  ###############################待修改生成函数##################################
-                  gene = range(self.geneLength)
-                  random.shuffle(gene)
-                  ###############################待修改生成函数##################################
-                  #Life两个参数，一个是序列gene，一个是这个序列的初始适应度值（score）
-                  # 因为适应度值越大，越可能被选择，所以一开始种群里的所有基因都被初始化为-1
-                  life = Life(gene)
-                  #把生成的这个基因序列life填进种群集合里
-                  self.lives.append(life)
- 
- 
+                chrome = [[0 for _ in range(18)] for _ in range(2)]
+                chrome = newchrome(chrome, 2, 2, 2, 4)
+                score = totaldis(chrome, origincoor, targetcoor, ThreatRadius, TurnRadius, ReconTime, Velocity)
+                ###############################待修改生成函数##################################
+                # Life两个参数，一个是序列gene，一个是这个序列的初始适应度值（score）
+                # 因为适应度值越大，越可能被选择，所以一开始种群里的所有基因都被初始化为-1
+                life = Life(chrome, score)
+                # 把生成的这个基因序列life填进种群集合里
+                self.lives.append(life)
+
       def judge(self):
             """评估，计算每一个个体的适配值"""
             # 适配值之和，用于选择时计算概率

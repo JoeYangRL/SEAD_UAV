@@ -5,7 +5,7 @@ SCORE_NONE = -1
  
 class Life(object):
       """个体类"""
-      def __init__(self, aGene = None):
+      def __init__(self, aGene = None, score = None):
             self.gene = aGene
             self.score = SCORE_NONE
 

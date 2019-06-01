@@ -7,12 +7,12 @@ from GA import GA
 class SEAD(object):
 	"""docstring for SEAD"""
 	def __init__(self, aLifeCount=100,aMaxMissionnum=3):
-		self.MaxMissionNum=aMaxMissionnum;
+		self.MaxMissionNum=aMaxMissionnum
 		self.lifecount=aLifeCount
 		self.ga=GA(aCrossRate=0.7, 
 			aMutationRate=0.02, 
 			aLifeCount=self.lifecount, 
-			aGeneLength= MaxMissionNum*len(self.uavs), #Limit the max times of a uav's mission
+			aGeneLength= self.MaxMissionNum*len(self.uavs), #Limit the max times of a uav's mission
 			aMatchFun = self.matchFun())
 
 
