@@ -8,53 +8,6 @@ def degtorad(angle):
 def radtodeg(angle):
     return angle / 2 / math.pi * 360
 
-def findzero(a,i):
-    for jj in range(3):
-        if a[3*(i-1)+jj] == 0:
-            return 3*(i-1) + jj
-    return None
-
-def findrepeat(a,index,UAV,l):
-    for m in range(3*(UAV-1),index):
-        if a[m] == l:
-            return False
-    return True
-
-def newchrome(chrome,ReconNum:int,UnionNum,CombatNum,TargetNum):
-    for j in range(TargetNum):
-        flag = 0
-        while flag == 0:
-            k = np.random.randint(1, ReconNum+UnionNum+1)
-            angle = random.randint(1, 360)
-            if findzero(chrome[0], k) != None:
-                if findrepeat(chrome[0], findzero(chrome[0], k), k, j + 1):
-                    a = findzero(chrome[0], k)
-                    chrome[0][a] = j + 1
-                    chrome[1][a] = angle
-                    flag = 1
-    for j in range(TargetNum):
-        flag = 0
-        while flag == 0:
-            k = np.random.randint(ReconNum+1, ReconNum+UnionNum+CombatNum+1)
-            angle = random.randint(1, 360)
-            if findzero(chrome[0], k) != None:
-                if findrepeat(chrome[0], findzero(chrome[0], k), k, j + 1):
-                    a = findzero(chrome[0], k)
-                    chrome[0][a] = (j + 1) * 100
-                    chrome[1][a] = angle
-                    flag = 1
-    for j in range(TargetNum):
-        flag = 0
-        while flag == 0:
-            k = np.random.randint(1, ReconNum+UnionNum+1)
-            angle = random.randint(1, 360)
-            if findzero(chrome[0], k) != None:
-                if findrepeat(chrome[0], findzero(chrome[0], k), k, j + 1):
-                    a = findzero(chrome[0], k)
-                    chrome[0][a] = (j + 1) * 10000
-                    chrome[1][a] = angle
-                    flag = 1
-    return chrome
 '''
 #要算旅行商问题的版本，每个无人机执行任务顺序未知
 def dismatrix(UAVMission:list,UAVcoor:list,targetcoor:list,ThreatRadius:int,TurnRadius:int,ReconTime:int,Velocity:int):

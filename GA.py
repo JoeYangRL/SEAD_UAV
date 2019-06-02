@@ -2,14 +2,19 @@
  
 import random
 from Life import Life
-from generate import newchrome
+from generate import newchrome,checklegal,correctchrome,wipe
 from distance import totaldis
+import numpy as np
 
 origincoor = [[0,0,0],[0,0,10],[0,0,20],[0,0,30],[0,0,40],[0,0,50]]
+ReconNum = 2
+UnionNum = 2
+CombatNum = 2
 targetcoor = [[3000,2000,4000,5000],[1000,5000,2000,4000]]
+TargetNum = len(targetcoor[0])
 ThreatRadius = 300
 TurnRadius = 100
-ReconTime = 5
+ReconTime = 2
 Velocity = 50
 
 class GA(object):
@@ -26,7 +31,7 @@ class GA(object):
             self.crossCount = 0                       #一开始还没交叉过，所以交叉次数是0
             self.mutationCount = 0                    #一开始还没变异过，所以变异次数是0
             self.bounds = 0.0                         #适配值之和，用于选择时计算概率
- 
+
             self.initPopulation()                     #初始化种群
  
  
@@ -34,8 +39,8 @@ class GA(object):
             """初始化种群"""
             self.lives = []
             for i in range(self.lifeCount):
-                chrome = [[0 for _ in range(18)] for _ in range(2)]
-                chrome = newchrome(chrome, 2, 2, 2, 4)
+                chrome = [[0 for _ in range(3*(ReconNum+UnionNum+CombatNum))] for _ in range(2)]
+                chrome = newchrome(chrome,ReconNum,UnionNum,CombatNum,TargetNum)
                 score = totaldis(chrome, origincoor, targetcoor, ThreatRadius, TurnRadius, ReconTime, Velocity)
                 ###############################待修改生成函数##################################
                 # Life两个参数，一个是序列gene，一个是这个序列的初始适应度值（score）
@@ -58,10 +63,39 @@ class GA(object):
                         self.best = life
  
  
-      def cross(self, parent1, parent2):
+      def cross(self, parent1:Life, parent2:Life):
+            """
+                        交叉:两染色体相同位置的片段之间的部分交叉
+                        输入：父代染色体(Life类）
+                        输出：交叉后的子代染色体(Life类）
+            """
+            index1 = np.random.randint(len(origincoor))
+            index2 = np.random.randint(index1+1,len(origincoor) + 1)
+            tempGene1 = [[], []]
+            tempGene2 = [[], []]
+            tempGene1[0] = parent1.gene[0][index1*3:index2*3]  # 交叉的基因片段
+            tempGene1[1] = parent1.gene[1][index1*3:index2*3]
+            tempGene2[0] = parent2.gene[0][index1*3:index2*3]  # 交叉的基因片段
+            tempGene2[1] = parent2.gene[1][index1*3:index2*3]
+            parent1.gene[0][index1*3:index2*3] = tempGene2[0]
+            parent1.gene[1][index1*3:index2*3] = tempGene2[1]
+            parent2.gene[0][index1*3:index2*3] = tempGene1[0]
+            parent2.gene[1][index1*3:index2*3] = tempGene1[1]
+            if checklegal(parent1.gene[0],len(targetcoor[0])) == False:
+                  parent1.gene = wipe(parent1.gene,index1*3,index2*3)
+                  parent1.gene = correctchrome(parent1.gene, index1, index2, TargetNum,ReconNum,UnionNum,CombatNum)
+            if checklegal(parent2.gene[0], len(targetcoor[0])) == False:
+                  parent2.gene = wipe(parent2.gene, index1 * 3, index2 * 3)
+                  parent2.gene = correctchrome(parent2.gene, index1, index2, TargetNum, ReconNum, UnionNum, CombatNum)
+            parent1.score = totaldis(parent1.gene, origincoor, targetcoor, ThreatRadius, TurnRadius, ReconTime, Velocity)
+            parent2.score = totaldis(parent2.gene, origincoor, targetcoor, ThreatRadius, TurnRadius, ReconTime, Velocity)
+            self.crossCount += 1
+            return parent1,parent2
+            '''
             """交叉"""
             index1 = random.randint(0, self.geneLength - 1)
             index2 = random.randint(index1, self.geneLength - 1)
+
             tempGene = parent2.gene[index1:index2]                      #交叉的基因片段
             newGene = []
             p1len = 0
@@ -74,17 +108,25 @@ class GA(object):
                         p1len += 1
             self.crossCount += 1
             return newGene
+            '''
  
- 
-      def  mutation(self, gene):
-            """突变"""
+      def  AngleMutation(self, parent:Life):
+            flag = 0
+            '''
+            角度突变:某一个任务的角度变化
+            输入：要突变的染色体(Life类）
+            输出：突变后的染色体(Life类）
+            '''
             ###############################待修改突变函数##################################
-            """
-            需要满足如下条件
-            前a位基因不做攻击任务
-            a~b位基因不做侦查/确认任务
-
-            """
+            while flag == 0:
+                  index = np.random.randint(len(parent.gene[0]) + 1)
+                  if parent.gene[0][index] != 0:
+                        flag = 1
+            parent.gene[1][index] = np.random.randint(1,361)
+            parent.score = totaldis(parent.gene, origincoor, targetcoor, ThreatRadius, TurnRadius, ReconTime, Velocity)
+            self.mutationCount += 1
+            return parent
+            '''
             index1 = random.randint(0, self.geneLength - 1)
             index2 = random.randint(0, self.geneLength - 1)
             ###############################待修改生成函数##################################
@@ -92,7 +134,7 @@ class GA(object):
             #突变次数加1
             self.mutationCount += 1
             return gene
- 
+            '''
  
       def getOne(self):
             """选择一个个体"""
@@ -122,7 +164,7 @@ class GA(object):
             #按概率突变
             rate = random.random()
             if rate < self.mutationRate:
-                  gene = self.mutation(gene)
+                  gene = self.AngleMutation(gene)
  
             return Life(gene)
  
