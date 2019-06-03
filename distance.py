@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import math
+import dunbins
 
 def degtorad(angle):
     return angle / 360 * 2 * math.pi
@@ -96,6 +97,22 @@ def totaldis(chrome:list,origincoor:list,targetcoor:list,ThreatRadius:int,TurnRa
         d = distance(UAVMission,UAVcoor,targetcoor,ThreatRadius,TurnRadius,ReconTime,Velocity)
         sum = sum + d
     return sum
+
+def shortestpath(q0,q1,turning_radius)
+		path = dubins.shortest_path(q0, q1, turning_radius)
+		configurations, _ = path.sample_many(0.5)	
+		xs=[]
+		ys=[]
+		zs=[]
+		dist=0
+		for i in range(0,len(configurations)):
+		    xs.append(configurations[i][0])
+		    ys.append(configurations[i][1])
+		    zs.append(configurations[i][2])
+		    if(i>=1):
+			x1=numpy.array([configurations[i][0]-configurations[i-1][0],configurations[i][1]-configurations[i-1][1]])
+			dist+=math.hypot(x1[0],x1[1])
+        return dist
 '''
 origincoor = [[0],[0],[0]]
 UAVMission = [[1,200],[20,30]]
