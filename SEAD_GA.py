@@ -17,6 +17,21 @@ class SEAD(object):
 
 
 	def shortest_distance(q0,q1)
+		path = dubins.shortest_path(q0, q1, turning_radius)
+		configurations, _ = path.sample_many(step_size)	
+		xs=[]
+		ys=[]
+		zs=[]
+		dist=0
+		for i in range(0,len(configurations)):
+		    xs.append(configurations[i][0])
+		    ys.append(configurations[i][1])
+		    zs.append(configurations[i][2])
+		    if(i>=1):
+			x1=numpy.array([configurations[i][0]-configurations[i-1][0],configurations[i][1]-configurations[i-1][1]])
+			dist+=math.hypot(x1[0],x1[1])
+	        return dist
+
 
 	def function():
 		pass
